@@ -36,15 +36,11 @@ ica.apply(epochs)
 # 4. 웨이블릿 변환을 통한 밴드 분리 및 추출
 freqs = np.logspace(*np.log10([4, 100]), num=20)
 n_cycles = freqs / 2.
-# [수정 사항] average=False 파라미터를 추가하여 각 에포크의 데이터를 보존
 power = tfr_morlet(epochs, freqs=freqs, n_cycles=n_cycles, use_fft=True,
                    return_itc=False, decim=3, n_jobs=1, average=False)
 
 def extract_band_power(power, fmin, fmax):
-    # power.freqs에서 fmin과 fmax 사이의 주파수 인덱스를 찾음
     band_indices = np.where((power.freqs >= fmin) & (power.freqs <= fmax))[0]
-    # power.data는 이제 (에포크, 채널, 주파수, 시간) 4차원이므로 기존 코드 사용 가능
-    # 주파수 축(axis=2)을 기준으로 평균을 내어 (에포크, 채널, 시간) 3차원 배열 생성
     band_power = power.data[:, :, band_indices, :].mean(axis=2)
     return band_power
 
@@ -68,7 +64,6 @@ csp = CSP(n_components=4, reg=None, log=True, norm_trace=False)
 X_csp_features = []
 
 for band in X_bands:
-    # 입력 데이터(X_bands[band])는 (에포크, 채널, 시간) 3차원으로 CSP에 적합
     csp.fit(X_bands[band], y)
     features = csp.transform(X_bands[band])
     X_csp_features.append(features)
@@ -81,3 +76,4 @@ cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scores = cross_val_score(lda, X_combined, y, cv=cv, n_jobs=1)
 
 print("LDA Classification Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
