@@ -37,7 +37,7 @@ ica.apply(epochs)
 freqs = np.logspace(*np.log10([4, 100]), num=20)
 n_cycles = freqs / 2.
 power = tfr_morlet(epochs, freqs=freqs, n_cycles=n_cycles, use_fft=True,
-                   return_itc=False, decim=3, n_jobs=1, average=False)
+                   return_itc=False, decim=3, n_jobs=-1, average=False)
 
 def extract_band_power(power, fmin, fmax):
     band_indices = np.where((power.freqs >= fmin) & (power.freqs <= fmax))[0]
@@ -73,7 +73,8 @@ X_combined = np.concatenate(X_csp_features, axis=1)
 # 6. LDA 머신러닝 및 교차 검증
 lda = LinearDiscriminantAnalysis()
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-scores = cross_val_score(lda, X_combined, y, cv=cv, n_jobs=1)
+scores = cross_val_score(lda, X_combined, y, cv=cv, n_jobs=-1)
 
 print("LDA Classification Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
 
